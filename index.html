@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soji Test ✨</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #fff4fb, #eef7ff);
+    color: #24243a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: min(680px, 100%);
+    background: rgba(255,255,255,.95);
+    border-radius: 28px;
+    padding: 34px;
+    box-shadow: 0 18px 60px rgba(50,40,100,.15);
+    text-align: center;
+  }
+  .logo { font-size: 54px; margin-bottom: 5px; }
+  h1 { margin: 0; font-size: clamp(34px, 7vw, 58px); }
+  .subtitle { color: #77758b; margin: 8px 0 28px; font-size: 17px; }
+  button {
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #24243a;
+    color: white;
+    transition: transform .15s, box-shadow .15s;
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(36,36,58,.2); }
+  .hidden { display: none; }
+  .progress {
+    height: 9px;
+    background: #eeeef5;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 26px;
+  }
+  .bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff7ab6, #7b8cff);
+    transition: width .3s;
+  }
+  .question { font-size: 24px; font-weight: 750; margin: 12px 0 22px; }
+  .options { display: grid; gap: 12px; text-align: left; }
+  .option {
+    width: 100%;
+    background: #f7f7fb;
+    color: #29283c;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    padding: 16px 18px;
+    font-weight: 600;
+    text-align: left;
+  }
+  .option:hover { border-color: #b8b9ff; background: #f2f2ff; }
+  .result-emoji { font-size: 70px; }
+  .score { font-size: 20px; color: #77758b; margin: 8px 0 18px; }
+  .result { font-size: 30px; font-weight: 800; margin: 5px 0 12px; }
+  .description { line-height: 1.6; color: #5f5e70; }
+  .tiny { margin-top: 22px; color: #aaa8b8; font-size: 12px; }
+</style>
+</head>
+<body>
+<main class="card">
+  <section id="start">
+    <div class="logo">✨</div>
+    <h1>Soji Test</h1>
+    <p class="subtitle">The totally unofficial, highly scientific test of… you. 😄</p>
+    <p>Answer 8 fun questions and discover your Soji personality.</p>
+    <button onclick="startTest()">Start the Soji Test 🚀</button>
+    <div class="tiny">100% free · No login · No data collected</div>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div id="counter"></div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+  </section>
+
+  <section id="result" class="hidden">
+    <div class="result-emoji" id="resultEmoji"></div>
+    <div class="score" id="score"></div>
+    <div class="result" id="resultTitle"></div>
+    <p class="description" id="resultDescription"></p>
+    <button onclick="restart()">Take it again 🔄</button>
+  </section>
+</main>
+
+<script>
+const questions = [
+  {
+    q: "Your perfect free afternoon is…",
+    a: [
+      ["A spontaneous adventure 🚗", 4],
+      ["Food + friends 🍕", 3],
+      ["A cosy day doing absolutely nothing 🛋️", 2],
+      ["Getting things organised like a boss 📋", 1]
+    ]
+  },
+  {
+    q: "Someone says “quick question…”",
+    a: [
+      ["I know this is going to take 45 minutes 😂", 3],
+      ["Hit me. I'm ready.", 4],
+      ["I suddenly become unavailable 👻", 2],
+      ["I already have a spreadsheet for it.", 1]
+    ]
+  },
+  {
+    q: "Pick your emergency superpower:",
+    a: [
+      ["Always finding snacks 🍪", 3],
+      ["Fixing everyone's problems 🦸", 4],
+      ["Teleporting home 🏠", 2],
+      ["Making everything run on schedule ⏱️", 1]
+    ]
+  },
+  {
+    q: "Your group chat is usually…",
+    a: [
+      ["100 unread messages 🔥", 4],
+      ["Memes and random nonsense 😂", 3],
+      ["Mostly silent, but I read everything 👀", 2],
+      ["Surprisingly well organised.", 1]
+    ]
+  },
+  {
+    q: "When plans suddenly change, you…",
+    a: [
+      ["Let's GO! 😎", 4],
+      ["Give me five minutes to process this.", 3],
+      ["Please return to the original plan. 😭", 1],
+      ["Adapt and carry on.", 2]
+    ]
+  },
+  {
+    q: "Choose a snack:",
+    a: [
+      ["Something spicy 🌶️", 4],
+      ["Chocolate 🍫", 3],
+      ["Crisps 🥔", 2],
+      ["Whatever is closest.", 1]
+    ]
+  },
+  {
+    q: "Your ideal holiday contains…",
+    a: [
+      ["A packed itinerary 🗺️", 4],
+      ["Amazing food 🍜", 3],
+      ["Sunshine and doing nothing ☀️", 2],
+      ["A beautiful hotel and peace.", 1]
+    ]
+  },
+  {
+    q: "Finally, what describes you best?",
+    a: [
+      ["Chaos, but make it fun ✨", 4],
+      ["The dependable one 🤝", 3],
+      ["Quietly observing everything 👀", 2],
+      ["I have a plan for that. 📋", 1]
+    ]
+  }
+];
+
+let current = 0;
+let total = 0;
+
+function startTest() {
+  current = 0;
+  total = 0;
+  document.getElementById("start").classList.add("hidden");
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("quiz").classList.remove("hidden");
+  showQuestion();
+}
+
+function showQuestion() {
+  const item = questions[current];
+  document.getElementById("counter").textContent =
+    `Question ${current + 1} of ${questions.length}`;
+  document.getElementById("question").textContent = item.q;
+  document.getElementById("bar").style.width =
+    `${(current / questions.length) * 100}%`;
+
+  const options = document.getElementById("options");
+  options.innerHTML = "";
+
+  item.a.forEach(([text, points]) => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.textContent = text;
+    btn.onclick = () => choose(points);
+    options.appendChild(btn);
+  });
+}
+
+function choose(points) {
+  total += points;
+  current++;
+
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("bar").style.width = "100%";
+
+  let emoji, title, description;
+
+  if (total >= 27) {
+    emoji = "🌈";
+    title = "The Ultimate Soji";
+    description = "You bring energy, fun and just the right amount of chaos wherever you go. Life is definitely more interesting when you're around!";
+  } else if (total >= 20) {
+    emoji = "😎";
+    title = "The Cool Soji";
+    description = "Relaxed, fun and dependable. You know how to enjoy yourself without completely losing the plot.";
+  } else if (total >= 14) {
+    emoji = "🧠";
+    title = "The Clever Soji";
+    description = "You observe, think and then make your move. Calm on the outside, probably running 17 thoughts at once inside.";
+  } else {
+    emoji = "📋";
+    title = "The Organised Soji";
+    description = "Someone has to keep everything together — and apparently that's you. Plans, lists and backup plans are your friends.";
+  }
+
+  document.getElementById("resultEmoji").textContent = emoji;
+  document.getElementById("resultTitle").textContent = title;
+  document.getElementById("score").textContent = `Your Soji score: ${total} / 32`;
+  document.getElementById("resultDescription").textContent = description;
+}
+
+function restart() {
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("start").classList.remove("hidden");
+}
+</script>
+</body>
+</html>
